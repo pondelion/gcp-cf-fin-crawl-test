@@ -48,4 +48,9 @@ resource "google_cloudfunctions_function" "function" {
   available_memory_mb   = 256
   timeout               = 360
   entry_point           = "main"
+
+  environment_variables = {
+    POSTGRES_DB_URI = var.POSTGRES_DB_URI
+    N_CODE_CUT = var.N_CODE_CUT
+  }
 }

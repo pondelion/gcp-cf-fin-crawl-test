@@ -1,2 +1,5 @@
 terraform.tfvars
 credentials.json
+.terraform*
+terraform.tfstate*
+cf_src.zip

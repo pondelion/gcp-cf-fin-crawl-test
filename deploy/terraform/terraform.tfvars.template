@@ -1,4 +1,5 @@
-credential_fileptah = ""
+credential_filepath = ""
 project_id = ""
 project_region = "asia-northeast1"
+project_zone = "asia-northeast1-a"
 bucket_name = ""
