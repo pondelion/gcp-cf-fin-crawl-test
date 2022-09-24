@@ -11,14 +11,16 @@ from rdb import (
 
 
 def to_stockprice_obj(code, sr_stockprice):
-    if sr_stockprice.isnull().any():
-        return None
+    # if sr_stockprice.isnull().any():
+    #     return None
     high = round(sr_stockprice[('High', f'{code}.T')])
     low = round(sr_stockprice[('Low', f'{code}.T')])
     open = round(sr_stockprice[('Open', f'{code}.T')])
     close = round(sr_stockprice[('Close', f'{code}.T')])
     volume = round(sr_stockprice[('Volume', f'{code}.T')])
     adj_close = round(sr_stockprice[('Adj Close', f'{code}.T')])
+    if any([pd.isnull(d) for d in [high, low, open, close, volume, adj_close]]):
+        return None
     date = sr_stockprice[('Date', '')]
     stockprice = YFDailyStockpriceModel(
         date=date,
@@ -52,7 +54,7 @@ def crawl(code_cut_idx: int, n_code_cut: int = int(os.environ.get('N_CODE_CUT', 
 
     stockprices_to_insert_all = []
 
-    print('target codes : {target_codes}')
+    print(f'target codes : {target_codes}')
 
     sdt = datetime.now()
     for code in target_codes:
