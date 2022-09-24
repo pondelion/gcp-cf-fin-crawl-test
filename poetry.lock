@@ -110,6 +110,25 @@ google-auth = ">=1.25.0,<3.0dev"
 grpc = ["grpcio (>=1.38.0,<2.0dev)"]
 
 [[package]]
+name = "google-cloud-pubsub"
+version = "2.13.7"
+description = "Google Cloud Pub/Sub API client library"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+google-api-core = {version = ">=1.32.0,<2.0.0 || >=2.8.0,<3.0.0dev", extras = ["grpc"]}
+grpc-google-iam-v1 = ">=0.12.4,<1.0.0dev"
+grpcio = ">=1.38.1,<2.0dev"
+grpcio-status = ">=1.16.0"
+proto-plus = ">=1.22.0,<2.0.0dev"
+protobuf = ">=3.19.0,<5.0.0dev"
+
+[package.extras]
+libcst = ["libcst (>=0.3.10)"]
+
+[[package]]
 name = "google-cloud-scheduler"
 version = "2.7.1"
 description = "Cloud Scheduler API API client library"
@@ -178,6 +197,7 @@ optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
+grpcio = {version = ">=1.0.0,<2.0.0dev", optional = true, markers = "extra == \"grpc\""}
 protobuf = ">=3.15.0,<5.0.0dev"
 
 [package.extras]
@@ -193,6 +213,18 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
 [package.extras]
 docs = ["sphinx"]
+
+[[package]]
+name = "grpc-google-iam-v1"
+version = "0.12.4"
+description = "IAM API client library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+googleapis-common-protos = {version = ">=1.56.0,<2.0.0dev", extras = ["grpc"]}
+grpcio = ">=1.0.0,<2.0.0dev"
 
 [[package]]
 name = "grpcio"
@@ -491,7 +523,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "fdaf67e29e536606c839acce60afba485513ada23fc212267a39bb33d82322db"
+content-hash = "ac75984f93056dba72cf07fb5ca5a7283615156a4996acae43aa7f9c1effbba6"
 
 [metadata.files]
 cachetools = []
@@ -502,12 +534,14 @@ google-api-python-client = []
 google-auth = []
 google-auth-httplib2 = []
 google-cloud-core = []
+google-cloud-pubsub = []
 google-cloud-scheduler = []
 google-cloud-storage = []
 google-crc32c = []
 google-resumable-media = []
 googleapis-common-protos = []
 greenlet = []
+grpc-google-iam-v1 = []
 grpcio = []
 grpcio-status = []
 httplib2 = []

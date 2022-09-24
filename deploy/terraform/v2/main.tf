@@ -16,8 +16,8 @@ provider "google" {
 
 data "archive_file" "function_archive" {
   type        = "zip"
-  source_dir  = "../../cf_src"
-  output_path = "./cf_src.zip"
+  source_dir  = "../../../cf_v2_src"
+  output_path = "./cf_v2_src.zip"
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -33,11 +33,11 @@ resource "google_storage_bucket_object" "packages" {
 }
 
 resource "google_pubsub_topic" "topic" {
-  name = "cf-fin-crawl-test-topic"
+  name = "cf-fin-crawl-v2-test-topic"
 }
 
 resource "google_cloudfunctions_function" "function" {
-  name                  = "cf-fin-crawl-test"
+  name                  = "cf-fin-crawl-v2-test"
   runtime               = "python310"
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.packages.name
@@ -52,5 +52,6 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = {
     POSTGRES_DB_URI = var.POSTGRES_DB_URI
     N_CODE_CUT = var.N_CODE_CUT
+    PROJECT_ID = var.PROJECT_ID
   }
 }
