@@ -1,11 +1,15 @@
 from datetime import date, datetime, timedelta
 import os
+import sys
+from typing import List
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import pandas as pd
 from pandas_datareader import data
+from tqdm import tqdm
 import numpy as np
 
-from rdb import (
+from cf_v2_src.rdb import (
     db,
     YFDailyStockpriceModel
 )
@@ -40,26 +44,21 @@ def to_stockprice_obj(code, sr_stockprice):
     return stockprice
 
 
-def crawl(code_cut_idx: int, n_code_cut: int = int(os.environ.get('N_CODE_CUT', 100))):
-    df_stocklist = pd.read_csv('./stocklist_latest.csv')
-    df_stocklist = df_stocklist[df_stocklist['市場・商品区分'].str.contains('内国株式')]
+def crawl(codes: List[int], start_dt: datetime, end_dt: datetime):
+    target_codes = codes
 
-    s_qcut, bins = pd.qcut(df_stocklist['コード'].unique(), n_code_cut, labels=range(n_code_cut), retbins=True)
-    print(bins)
-    df_cut = [df_stocklist[(df_stocklist['コード'] >= int(s_code)) & (df_stocklist['コード'] <= int(e_code))] for s_code, e_code in zip(bins[:-1], bins[1:])]
-    print([len(df) for df in df_cut])
+    print(f'target codes : {target_codes}')
 
-    target_codes = df_cut[code_cut_idx]['コード'].tolist()
-
-    df = data.DataReader([f"{code}.T" for code in target_codes], 'yahoo', start=date.today()-timedelta(days=4), end=date.today())
+    sdt = datetime.now()
+    df = data.DataReader([f"{code}.T" for code in target_codes], 'yahoo', start=start_dt, end=end_dt)
+    edt = datetime.now()
+    print(f'[stockprice crawl] took {(edt-sdt).total_seconds()}s')
     if len(df) == 0:
         print('len(df) == 0')
         return
-    print(df.reset_index())
+    # print(df.reset_index())
 
     stockprices_to_insert_all = []
-
-    print(f'target codes : {target_codes}')
 
     sdt = datetime.now()
     for code in target_codes:
@@ -94,3 +93,23 @@ def crawl(code_cut_idx: int, n_code_cut: int = int(os.environ.get('N_CODE_CUT', 
         db.commit()
         edt = datetime.now()
         print(f'[stockprice bulk insert] took {(edt-sdt).total_seconds()}s')
+
+
+
+N_CODE_CUT = 100
+
+df_stocklist = pd.read_csv(os.path.join(os.path.dirname(__file__), '..', 'cf_v2_src', 'stocklist_latest.csv'))
+df_stocklist = df_stocklist[df_stocklist['市場・商品区分'].str.contains('内国株式')]
+
+s_qcut, bins = pd.qcut(df_stocklist['コード'].unique(), N_CODE_CUT, labels=range(N_CODE_CUT), retbins=True)
+# print(bins)
+df_cut = [df_stocklist[(df_stocklist['コード'] >= int(s_code)) & (df_stocklist['コード'] <= int(e_code))] for s_code, e_code in zip(bins[:-1], bins[1:])]
+print([len(df) for df in df_cut])
+
+for idx in tqdm(range(N_CODE_CUT)):
+    if idx < 5:
+        print(f'skipping idx {idx}')
+        continue
+    target_codes = df_cut[idx]['コード'].sort_values().tolist()
+
+    crawl(target_codes, date.today() - timedelta(days=365*5), date.today())
