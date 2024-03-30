@@ -1,4 +1,4 @@
-from cf_src.rdb import (
+from cf_v2_src.rdb import (
     init_rdb,
 )
 

@@ -3,6 +3,7 @@ import os
 
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, BigInteger, Text, UniqueConstraint
+from sqlalchemy.sql import func
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -10,7 +11,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 
-DB_URI = os.environ['POSTGRES_DB_URI']
+DB_URI = os.environ['DB_URI']
 
 
 @as_declarative()
@@ -30,15 +31,25 @@ class YFDailyStockpriceModel(Base):
     open = Column(Integer, nullable=False)
     close = Column(Integer, nullable=False)
     high = Column(Integer, nullable=False)
-    low = Column(Integer, nullable=True)
+    low = Column(Integer, nullable=False)
     adj_close = Column(Integer, nullable=False)
     volume = Column(Integer, nullable=False)
     company_code = Column(BigInteger, ForeignKey("company.code"), nullable=False)
-    # created_at = Column(
-    #     DateTime,
-    #     server_default=current_timestamp()
-    # )
-    __table_args__ = (UniqueConstraint('date', 'company_code', name='unique_date_company_code'),)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint('date', 'company_code', name='unique_date_company_code_yf'),)
+
+
+class StooqDailyStockpriceModel(Base):
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True, nullable=False)
+    date = Column(Date, index=True)
+    open = Column(Integer, nullable=False)
+    close = Column(Integer, nullable=False)
+    high = Column(Integer, nullable=False)
+    low = Column(Integer, nullable=False)
+    volume = Column(Integer, nullable=False)
+    company_code = Column(BigInteger, ForeignKey("company.code"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint('date', 'company_code', name='unique_date_company_code_stooq'),)
 
 
 class SectorModel(Base):
@@ -73,6 +84,21 @@ class CompanyModel(Base):
     sector = relationship("SectorModel", back_populates="company")
 
 
+class StooqHourlyUpdateStatusModel(Base):
+    code_cut_index = Column(Integer, primary_key=True, nullable=False, unique=True)  # 0-23
+    last_succeeded = Column(Boolean, nullable=False)
+    last_succeeded_at = Column(DateTime, nullable=True)
+    last_crawled_at = Column(DateTime, nullable=True)
+    ip = Column(Text, nullable=True)
+
+
+class YahooHourlyUpdateStatusModel(Base):
+    code_cut_index = Column(Integer, primary_key=True, nullable=False, unique=True)  # 0-23
+    last_succeeded = Column(Boolean, nullable=False)
+    last_succeeded_at = Column(DateTime, nullable=True)
+    last_crawled_at = Column(DateTime, nullable=True)
+    ip = Column(Text, nullable=True)
+
 
 def delete_database() -> None:
     if database_exists(DB_URI):
@@ -88,7 +114,7 @@ def create_databse() -> None:
 
 local_engine = create_engine(
     DB_URI,
-    convert_unicode=True,
+    # convert_unicode=True,
     pool_pre_ping=True
 )
 
@@ -96,7 +122,7 @@ Session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=lo
 Base.query = Session.query_property()
 
 db = Session()
-print(local_engine.table_names())
+# print(local_engine.table_names())
 
 
 def init_rdb(
@@ -122,11 +148,23 @@ def drop_tables() -> None:
     except Exception as e:
         print(e)
     try:
+        StooqDailyStockpriceModel.__table__.drop(local_engine)
+    except Exception as e:
+        print(e)
+    try:
         CompanyModel.__table__.drop(local_engine)
     except Exception as e:
         print(e)
     try:
         SectorModel.__table__.drop(local_engine)
+    except Exception as e:
+        print(e)
+    try:
+        StooqHourlyUpdateStatusModel.__table__.drop(local_engine)
+    except Exception as e:
+        print(e)
+    try:
+        YahooHourlyUpdateStatusModel.__table__.drop(local_engine)
     except Exception as e:
         print(e)
     try:

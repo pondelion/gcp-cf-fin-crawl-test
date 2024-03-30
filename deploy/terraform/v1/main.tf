@@ -50,7 +50,7 @@ resource "google_cloudfunctions_function" "function" {
   entry_point           = "main"
 
   environment_variables = {
-    POSTGRES_DB_URI = var.POSTGRES_DB_URI
+    DB_URI = var.DB_URI
     N_CODE_CUT = var.N_CODE_CUT
   }
 }

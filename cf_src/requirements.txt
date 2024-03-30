@@ -4,3 +4,4 @@ pandas-datareader
 SQLAlchemy
 psycopg2
 SQLAlchemy-Utils
+yfinance

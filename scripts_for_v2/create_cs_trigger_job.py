@@ -16,7 +16,8 @@ try:
         client,
         project_id,
         job_id='cf-fin-crawl-v2-test-job',
-        schedule=f'1 0 * * *',
+        # schedule=f'1 0 * * *',
+        schedule=f'15 * * * *',
         pubsub_target_topic_name=f'projects/{project_id}/topics/cf-fin-crawl-v2-test-topic',
         pubsub_target_data=f'0',
     )
