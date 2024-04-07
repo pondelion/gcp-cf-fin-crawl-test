@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 import os
 
 import pandas as pd
@@ -95,7 +95,17 @@ def crawl_yf(
     update_status = update_status[0]
     update_status.ip = ip
 
-    df = data.get_data_yahoo(target_symbols, start=start_date, end=date.today() + timedelta(days=1))
+    JST = timezone(timedelta(hours=+9), 'JST')
+    dt_now_jst = datetime.now(JST)
+    if dt_now_jst.hour >= 17:
+        # today's market closed, fetch data upto today
+        end_date = dt_now_jst.date() + timedelta(days=1)  # yahoo api returns max date = end_day-1day(=today)
+    else:
+        # today's market not closed, fetch data upto yesterday
+        end_date = dt_now_jst.date()  # yahoo api returns max date = end_day-1day(=yesterday)
+    # end_date = dt_now_jst.date()
+    print(f'crawling {start_date} - {end_date}, dt_now_jst : {dt_now_jst}')
+    df = data.get_data_yahoo(target_symbols, start=start_date, end=end_date)
     if len(df) == 0:
         print(f'len(df) == 0 : {df.index.name}')
         update_status.last_succeeded = False
@@ -104,7 +114,18 @@ def crawl_yf(
         db.close()
         return
     df.index.name = 'Date'
+    print(f'df.index.max() : {df.index.max()}')
     print(df.reset_index())
+    if (dt_now_jst.hour < 16) and (df.index.max() == end_date):
+        print('[WARNING] (dt_now_jst.hour < 16) and (df.index.max() == end_date)')
+    if dt_now_jst.hour >= 17:
+        # today's market closed, retain data upto today
+        max_date_to_retain = dt_now_jst.date()
+    else:
+        # today's market not closed, retain data upto yesterday
+        max_date_to_retain = dt_now_jst.date() - timedelta(days=1)
+    df = df[df.index.map(lambda x: x.date()) <= max_date_to_retain]
+    print(f'df.index.max() after filter : {df.index.max()}')
 
     stockprices_to_insert_all = []
 
@@ -184,7 +205,16 @@ def crawl_stooq(
     update_status = update_status[0]
     update_status.ip = ip
 
-    df = data.DataReader(target_symbols, 'stooq', start=start_date, end=date.today() + timedelta(days=1))
+    JST = timezone(timedelta(hours=+9), 'JST')
+    dt_now_jst = datetime.now(JST)
+    # if dt_now_jst.hour >= 17:
+    #     # today's market closed, fetch data upto today
+    #     end_date = dt_now_jst.date()
+    # else:
+    #     # today's market not closed, fetch data upto yesterday
+    #     end_date = dt_now_jst.date() - timedelta(days=1)
+    end_date = dt_now_jst.date()
+    df = data.DataReader(target_symbols, 'stooq', start=start_date, end=end_date)
     if len(df) == 0:
         print(f'len(df) == 0 : {df.index.name}')
         update_status.last_succeeded = False

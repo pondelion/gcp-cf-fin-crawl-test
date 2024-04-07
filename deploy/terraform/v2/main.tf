@@ -45,7 +45,7 @@ resource "google_cloudfunctions_function" "function" {
     event_type = "providers/cloud.pubsub/eventTypes/topic.publish"
     resource   = google_pubsub_topic.topic.name
   }
-  available_memory_mb   = 256
+  available_memory_mb   = 512
   timeout               = 360
   entry_point           = "main"
 
