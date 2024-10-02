@@ -79,7 +79,11 @@ def crawl_yf(
     df_stocklist = pd.read_csv('./stocklist_latest.csv')
     df_stocklist = df_stocklist.replace('-', np.nan)
     # TARGET_MARKETS = ['プライム（内国株式）', 'スタンダード（内国株式）', 'グロース（内国株式）']
-    df_stocklist = df_stocklist[df_stocklist['市場・商品区分'].str.contains('内国株式')]
+    df_stocklist = df_stocklist.loc[
+        (df_stocklist['市場・商品区分'].str.contains('内国株式'))
+        |
+        (df_stocklist['市場・商品区分'].str.contains('ETF'))
+    ]
 
     s_qcut, bins = pd.qcut(df_stocklist['コード'].unique(), n_code_cut, labels=range(n_code_cut), retbins=True)
     # print(bins)
@@ -189,7 +193,11 @@ def crawl_stooq(
     df_stocklist = pd.read_csv('./stocklist_latest.csv')
     df_stocklist = df_stocklist.replace('-', np.nan)
     # TARGET_MARKETS = ['プライム（内国株式）', 'スタンダード（内国株式）', 'グロース（内国株式）']
-    df_stocklist = df_stocklist[df_stocklist['市場・商品区分'].str.contains('内国株式')]
+    df_stocklist = df_stocklist.loc[
+        (df_stocklist['市場・商品区分'].str.contains('内国株式'))
+        |
+        (df_stocklist['市場・商品区分'].str.contains('ETF'))
+    ]
 
     s_qcut, bins = pd.qcut(df_stocklist['コード'].unique(), n_code_cut, labels=range(n_code_cut), retbins=True)
     # print(bins)

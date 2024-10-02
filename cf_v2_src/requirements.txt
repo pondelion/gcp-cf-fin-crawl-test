@@ -5,4 +5,4 @@ SQLAlchemy
 psycopg2
 SQLAlchemy-Utils
 google-cloud-pubsub
-yfinance
+yfinance==0.2.40

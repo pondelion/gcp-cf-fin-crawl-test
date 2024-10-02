@@ -14,7 +14,11 @@ init_rdb()
 
 
 df_stocklist = pd.read_csv('./cf_src/stocklist_latest.csv')
-df_stocklist = df_stocklist[df_stocklist['市場・商品区分'].str.contains('内国株式')]
+df_stocklist = df_stocklist.loc[
+    (df_stocklist['市場・商品区分'].str.contains('内国株式'))
+    |
+    (df_stocklist['市場・商品区分'].str.contains('ETF'))
+]
 
 uniq_sectors = sorted(df_stocklist['33業種区分'].unique().tolist())
 
