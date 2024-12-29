@@ -3,10 +3,16 @@
 ## deploy cloud function
 
 ```sh
-$ cd deploy/terraform
+$ cd deploy/terraform/v{x}
 $ terraform init
 $ terraform plan
 $ terraform apply
+```
+
+- delete
+
+```sh
+& terraform apply -destroy
 ```
 
 required roles for service account

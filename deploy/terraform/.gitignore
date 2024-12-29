@@ -4,3 +4,4 @@ credentials.json
 terraform.tfstate*
 cf_src.zip
 cf_v2_src.zip
+cf_v3_src.zip

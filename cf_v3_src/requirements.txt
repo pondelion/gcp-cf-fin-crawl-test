@@ -1,0 +1,8 @@
+# Function dependencies, for example:
+# package>=version
+pandas-datareader
+SQLAlchemy
+psycopg2
+SQLAlchemy-Utils
+google-cloud-pubsub
+yfinance==0.2.40
