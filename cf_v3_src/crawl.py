@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from pandas_datareader import data
 import numpy as np
+import yfinance as yf
 
 from rdb import (
     db,
@@ -27,7 +28,7 @@ def to_yf_stockprice_obj(code, sr_stockprice):
     open = sr_stockprice[('Open', f'{code}.T')]
     close = sr_stockprice[('Close', f'{code}.T')]
     volume = sr_stockprice[('Volume', f'{code}.T')]
-    adj_close = sr_stockprice[('Adj Close', f'{code}.T')]
+    adj_close = 0  # sr_stockprice[('Adj Close', f'{code}.T')]
     if any([pd.isnull(d) for d in [high, low, open, close, volume, adj_close]]):
         return None
     date = sr_stockprice[('Date', '')]
@@ -72,8 +73,8 @@ def crawl_yf(
     start_date = date.today()-timedelta(days=4),
     ip: str = None,
 ):
-    import yfinance as yf
-    yf.pdr_override()
+    # import yfinance as yf
+    # yf.pdr_override()
 
     df_stocklist = pd.read_csv('./stocklist_latest.csv')
     df_stocklist = df_stocklist.replace('-', np.nan)
@@ -108,7 +109,7 @@ def crawl_yf(
         end_date = dt_now_jst.date()  # yahoo api returns max date = end_day-1day(=yesterday)
     # end_date = dt_now_jst.date()
     print(f'crawling {start_date} - {end_date}, dt_now_jst : {dt_now_jst}')
-    df = data.get_data_yahoo(target_symbols, start=start_date, end=end_date)
+    df = yf.download(target_symbols, start=start_date, end=end_date, auto_adjust=True)
     if len(df) == 0:
         print(f'len(df) == 0 : {df.index.name}')
         update_status.last_succeeded = False

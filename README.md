@@ -12,7 +12,7 @@ $ terraform apply
 - delete
 
 ```sh
-& terraform apply -destroy
+$ terraform apply destroy
 ```
 
 required roles for service account
