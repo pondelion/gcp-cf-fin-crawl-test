@@ -26,11 +26,11 @@ class Base:
     #     return f'{cls.__name__.lower()}'.replace('model', '')
 
 
-class YFUS1HStockpriceModel(Base):
-    __tablename__ = 'yf_us_1h_stockprice'
+class YFUS1DStockpriceModel(Base):
+    __tablename__ = 'yf_us_1d_stockprice'
 
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True, nullable=False)
-    ticker = Column(String(10), index=True, nullable=False)  # e.g., "SPY", "QQQ"
+    ticker = Column(String(10), index=True, nullable=False)
     datetime = Column(DateTime, index=True, nullable=False)
     open = Column(Numeric(10, 4), nullable=False)
     close = Column(Numeric(10, 4), nullable=False)
@@ -40,12 +40,12 @@ class YFUS1HStockpriceModel(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('datetime', 'ticker', name='unique_datetime_ticker'),
+        UniqueConstraint('datetime', 'ticker', name='unique_datetime_ticker_yf_us_1d_stockprice'),
     )
 
 
-class YFUS1HUpdateStatusModel(Base):
-    __tablename__ = 'yf_us_1h_update_status'
+class YFUS1DUpdateStatusModel(Base):
+    __tablename__ = 'yf_us_1d_update_status'
 
     crawl_timing_index = Column(Integer, primary_key=True, nullable=False, unique=True)
     last_succeeded = Column(Boolean, nullable=False)
@@ -110,11 +110,11 @@ def show_tables() -> None:
 def drop_tables() -> None:
     # Base.metadata.drop_all(local_engine)
     try:
-        YFUS1HStockpriceModel.__table__.drop(local_engine)
+        YFUS1DStockpriceModel.__table__.drop(local_engine)
     except Exception as e:
         print(e)
     try:
-        YFUS1HUpdateStatusModel.__table__.drop(local_engine)
+        YFUS1DUpdateStatusModel.__table__.drop(local_engine)
     except Exception as e:
         print(e)
     try:

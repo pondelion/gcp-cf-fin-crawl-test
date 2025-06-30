@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta, timezone
-import os
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import numpy as np
@@ -7,14 +7,14 @@ import yfinance as yf
 
 from rdb import (
     use_db_session,
-    YFUS1HStockpriceModel,
-    YFUS1HUpdateStatusModel,
+    YFUS1DStockpriceModel,
+    YFUS1DUpdateStatusModel,
 )
 
 
 @use_db_session
 def crawl_yf(
-    start_datetime = datetime.now()-timedelta(hours=6),
+    start_datetime = datetime.now()-timedelta(days=4),
     ip: str = None,
     crawl_timing_index: int = datetime.now().hour,
     db = None,
@@ -30,12 +30,12 @@ def crawl_yf(
     target_tickers = df_stocklist_tgt['ticker'].tolist()
     print(f'target tickers : {target_tickers}')
 
-    update_status = db.query(YFUS1HUpdateStatusModel).filter(
-        YFUS1HUpdateStatusModel.crawl_timing_index == crawl_timing_index
+    update_status = db.query(YFUS1DUpdateStatusModel).filter(
+        YFUS1DUpdateStatusModel.crawl_timing_index == crawl_timing_index
     ).one_or_none()
 
     if update_status is None:
-        update_status = YFUS1HUpdateStatusModel(
+        update_status = YFUS1DUpdateStatusModel(
             crawl_timing_index=crawl_timing_index,
             last_succeeded=False,
             last_succeeded_at=None,
@@ -46,16 +46,18 @@ def crawl_yf(
     else:
         update_status.ip = ip
 
-    dt_now_utc = datetime.now(timezone.utc)
-    def floor_to_1h_from_30(dt):
-        dt_floor = dt.replace(minute=30, second=0, microsecond=0)
-        if dt.minute < 30:
-            dt_floor = dt_floor - timedelta(hours=1)
-        return dt_floor
-    # dt_now_utc.replace(minute=0, second=0, microsecond=0)
-    end_datetime = floor_to_1h_from_30(dt_now_utc)  # floor to previous XX:30
-    print(f'crawling {start_datetime} - {end_datetime}, dt_now_utc : {dt_now_utc}')
-    df = yf.download(target_tickers, start=start_datetime, end=end_datetime, interval='1h', auto_adjust=True)
+    # Define U.S. Eastern Time zone using standard library
+    US_EASTERN = ZoneInfo("America/New_York")
+    dt_now_est = datetime.now(US_EASTERN)
+    # U.S. stock market closes at 4:00 PM EST
+    if dt_now_est.hour >= 16:
+        # Market is closed — fetch data up to today
+        end_date = dt_now_est.date() + timedelta(days=1)  # yfinance's end date is exclusive
+    else:
+        # Market is still open — fetch data up to yesterday
+        end_date = dt_now_est.date()
+    print(f'Crawling data from {start_datetime.date()} to {end_date}, current EST: {dt_now_est}')
+    df = yf.download(target_tickers, start=start_datetime.date(), end=end_date, interval='1d', auto_adjust=True)
     if len(df) == 0:
         print(f'len(df) == 0 : {df.index.name}')
         update_status.last_succeeded = False
@@ -83,12 +85,11 @@ def crawl_yf(
 
         df_t = df[ticker].reset_index()  # Open/High/Low/Close/Volume
 
-        # 既存レコード取得
         existing = {
             r.datetime.replace(tzinfo=None)
-            for r in db.query(YFUS1HStockpriceModel.datetime)
-                        .filter(YFUS1HStockpriceModel.ticker == ticker)
-                        .filter(YFUS1HStockpriceModel.datetime >= df_t['datetime'].min())
+            for r in db.query(YFUS1DStockpriceModel.datetime)
+                        .filter(YFUS1DStockpriceModel.ticker == ticker)
+                        .filter(YFUS1DStockpriceModel.datetime >= df_t['datetime'].min())
                         .all()
         }
 
@@ -97,7 +98,7 @@ def crawl_yf(
             if dt in existing:
                 continue
 
-            obj = YFUS1HStockpriceModel(
+            obj = YFUS1DStockpriceModel(
                 ticker=ticker,
                 datetime=dt,
                 open=row['Open'],
