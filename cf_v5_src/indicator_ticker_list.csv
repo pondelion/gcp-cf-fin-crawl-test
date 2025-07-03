@@ -1,0 +1,34 @@
+ticker,description
+^SKEW,Measures tail risk of the S&P 500; indicates market perception of extreme risk
+^VIX,Volatility Index of the S&P 500; market fear gauge
+^VVIX,Volatility of VIX index (VIX of VIX)
+^MOVE,Volatility index of U.S. Treasury bonds; measures bond market volatility
+^TYX,30-year U.S. Treasury yield index
+^TNX,10-year U.S. Treasury yield index
+^IRX,3-month U.S. Treasury yield index
+^FVX,5-year U.S. Treasury yield index
+DX-Y.NYB,U.S. Dollar Index; measures USD strength against major currencies
+^GSPC,S&P 500 index
+^RUT,Russell 2000 index (small-cap stocks)
+GC=F,Gold futures price (safe haven asset)
+HG=F,Copper futures price (economic indicator)
+SI=F,Silver futures price
+CL=F,WTI crude oil futures price
+BZ=F,Brent crude oil futures price
+ZB=F,30-year U.S. Treasury bond futures price
+BTC-USD,Bitcoin price in USD
+ETH-USD,Ethereum price in USD
+^NYFANG,NYSE FANG+ index (major tech growth stocks)
+^DJT,Dow Jones Transportation Average (transport sector index)
+^VIX9D,9-day ahead VIX volatility index
+^VIX3M,3-month ahead VIX volatility index
+^VIX6M,6-month ahead VIX volatility index
+USDJPY=X,"USD to JPY exchange rate – used widely in Asian markets; a proxy for global risk sentiment"
+EURUSD=X,"Euro to USD – the most traded forex pair; reflects global risk appetite and USD strength"
+GBPUSD=X,"British Pound to USD – volatile and sensitive to speculative flows; sometimes aligned with crypto sentiment"
+AUDUSD=X,"Australian Dollar to USD – a commodity-linked and risk-on currency; often moves with crypto trends"
+NZDUSD=X,"New Zealand Dollar to USD – risk-sensitive with lower liquidity; may signal early market sentiment shifts"
+USDCNH=X,"USD to Chinese Yuan (offshore) – used to gauge capital flow from China; crypto correlation seen during regulatory changes"
+USDKRW=X,"USD to South Korean Won – South Korea is a major crypto market; local sentiment often impacts prices"
+USDTRY=X,"USD to Turkish Lira – high inflation and capital flight in Turkey make crypto an alternative store of value"
+USDZAR=X,"USD to South African Rand – used as a proxy for emerging markets’ risk and crypto safe haven behavior"

@@ -20,7 +20,11 @@ def crawl_yf(
     db = None,
 ):
 
-    df_tickerlist = pd.read_csv('./ticker_list.csv')
+    df_etf_tickerlist = pd.read_csv('./etf_ticker_list.csv')
+    df_etf_tickerlist['crawl_hour_utc'] = 22
+    df_indicator_tickerlist = pd.read_csv('./indicator_ticker_list.csv')
+    df_indicator_tickerlist['crawl_hour_utc'] = 23
+    df_tickerlist = pd.concat([df_etf_tickerlist, df_indicator_tickerlist])
 
     # df_stocklist_tgt = df_tickerlist.loc[df_tickerlist['crawl_hour_utc'] == crawl_timing_index]
     df_stocklist_tgt = df_tickerlist
@@ -84,6 +88,11 @@ def crawl_yf(
             continue
 
         df_t = df[ticker].reset_index()  # Open/High/Low/Close/Volume
+        df_t = df_t.dropna(subset=['Close', 'High', 'Low', 'Open'])
+        if len(df_t) == 0:
+            print(f'{ticker} len=0 after dropna')
+            continue
+        df_t = df_t.fillna(0)
 
         existing = {
             r.datetime.replace(tzinfo=None)
