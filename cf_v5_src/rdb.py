@@ -36,7 +36,7 @@ class YFUS1DStockpriceModel(Base):
     close = Column(Numeric(10, 4), nullable=False)
     high = Column(Numeric(10, 4), nullable=False)
     low = Column(Numeric(10, 4), nullable=False)
-    volume = Column(Integer, nullable=False)
+    volume = Column(BigInteger, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     __table_args__ = (

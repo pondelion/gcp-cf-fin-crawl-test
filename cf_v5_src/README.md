@@ -1,2 +1,2 @@
 
-US ETF 1d
+US ETF and Common Macro/Indicators 1d
