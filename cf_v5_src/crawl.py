@@ -2,14 +2,38 @@ from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-import numpy as np
 import yfinance as yf
+from sqlalchemy.dialects.postgresql import insert
 
 from rdb import (
     use_db_session,
     YFUS1DStockpriceModel,
     YFUS1DUpdateStatusModel,
 )
+
+
+def upsert_stockprice(db, obj):
+    stmt = insert(YFUS1DStockpriceModel).values(
+        ticker=obj.ticker,
+        datetime=obj.datetime,
+        open=obj.open,
+        close=obj.close,
+        high=obj.high,
+        low=obj.low,
+        volume=obj.volume,
+    )
+    update_dict = {
+        'open': obj.open,
+        'close': obj.close,
+        'high': obj.high,
+        'low': obj.low,
+        'volume': obj.volume,
+    }
+    stmt = stmt.on_conflict_do_update(
+        index_elements=['datetime', 'ticker'],
+        set_=update_dict,
+    )
+    db.execute(stmt)
 
 
 @use_db_session
@@ -136,7 +160,7 @@ def crawl_yf(
             if save_mode == 'insert':
                 stockprices_to_insert_all.append(obj)
             elif save_mode == 'upsert':
-                db.merge(obj)
+                upsert_stockprice(db, obj)
             else :
                 raise ValueError(save_mode)
 

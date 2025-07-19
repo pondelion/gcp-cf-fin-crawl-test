@@ -31,7 +31,7 @@ class YFUS1DStockpriceModel(Base):
 
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True, nullable=False)
     ticker = Column(String(10), index=True, nullable=False)
-    datetime = Column(DateTime, index=True, nullable=False)
+    datetime = Column(DateTime(timezone=False), index=True, nullable=False)
     open = Column(Numeric(10, 4), nullable=False)
     close = Column(Numeric(10, 4), nullable=False)
     high = Column(Numeric(10, 4), nullable=False)
